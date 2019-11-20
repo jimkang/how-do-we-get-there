@@ -49,7 +49,8 @@ function followRoute({
   friendFigure,
   randomizeJointCount,
   firstPage,
-  lastPage
+  lastPage,
+  gridUnitSize = 5
 }) {
   if (!seed) {
     seed = new Date().toISOString();
@@ -75,8 +76,9 @@ function followRoute({
     figure,
     friendFigure,
     randomizeJointCount,
-    firstPage: firstPage === 'yes',
-    lastPage: lastPage === 'yes'
+    firstPage,
+    lastPage,
+    gridUnitSize
   });
   wireControls({ pageFlow, clearSeed, hideUI: hideUI === 'yes' });
   pageFlow({ stepMode });

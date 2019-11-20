@@ -41,7 +41,8 @@ function PageFlow({
   firstPage,
   lastPage,
   illusWidth = 100,
-  illusHeight = 118
+  illusHeight = 118,
+  gridUnitSize
 }) {
   var random = seedrandom(seed);
   var probable = Probable({ random });
@@ -138,10 +139,9 @@ function PageFlow({
   }
 
   function getRandomPoint() {
-    return [
-      ~~(probable.roll(illusWidth * 10) / 10),
-      ~~(probable.roll(illusHeight * 10) / 10)
-    ];
+    const x = ~~(probable.roll(illusWidth + 1) / gridUnitSize) * gridUnitSize;
+    const y = ~~(probable.roll(illusHeight + 1) / gridUnitSize) * gridUnitSize;
+    return [x, y];
   }
 
   function nodeStep() {
