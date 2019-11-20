@@ -112,7 +112,15 @@ button {
 
 #book-area {
   margin: 1em;
-  height: 1024px;
+  width: 850px;
+  height: 1100px;
+  background-color: black;
+  border: 1px solid white;
+}
+
+#illustration {
+  background-color: black;
+  border: 1px solid white;
 }
 
 @media all and (max-height: 568px) {

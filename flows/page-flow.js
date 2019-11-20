@@ -39,7 +39,9 @@ function PageFlow({
   figure = '🐙',
   friendFigure = '🦀',
   firstPage,
-  lastPage
+  lastPage,
+  illusWidth = 100,
+  illusHeight = 118
 }) {
   var random = seedrandom(seed);
   var probable = Probable({ random });
@@ -136,7 +138,10 @@ function PageFlow({
   }
 
   function getRandomPoint() {
-    return [probable.roll(1000) / 10, probable.roll(1000) / 10];
+    return [
+      ~~(probable.roll(illusWidth * 10) / 10),
+      ~~(probable.roll(illusHeight * 10) / 10)
+    ];
   }
 
   function nodeStep() {
