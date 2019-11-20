@@ -1,0 +1,43 @@
+{
+  "name": "how-do-we-get-there",
+  "version": "1.0.0",
+  "description": "Makes a book!",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "test": "make test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:jimkang/how-do-we-get-there.git"
+  },
+  "keywords": [],
+  "author": "Jim Kang",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jimkang/how-do-we-get-there/issues"
+  },
+  "homepage": "https://github.com/jimkang/how-do-we-get-there",
+  "devDependencies": {
+    "browserify": "^14.5.0",
+    "uglify-es": "^3.1.9"
+  },
+  "dependencies": {
+    "accessor": "^2.0.0",
+    "basic-2d-math": "^1.0.0",
+    "d3-array": "^2.0.2",
+    "d3-selection": "^1.3.2",
+    "d3-shape": "^1.2.2",
+    "d3-zoom": "^1.7.3",
+    "enmeaten": "^3.0.0",
+    "handle-error-web": "^1.0.1",
+    "js-graph-algorithms": "^1.0.18",
+    "lodash.curry": "^4.1.1",
+    "lodash.flatten": "^4.4.0",
+    "lodash.pluck": "^3.1.2",
+    "probable": "^2.1.2",
+    "route-state": "^2.0.5",
+    "seedrandom": "^2.4.4",
+    "standard-bail": "^2.0.1"
+  }
+}
