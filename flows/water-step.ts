@@ -75,17 +75,20 @@ function waterStep({
       dist(lastPt, dest) > 2;
       lastPt = pathPoints[pathPoints.length - 1]
     ) {
+      // Moving in increments of 0.5 to avoid
+      // situations in which quantization creates
+      // big diagonal gaps in rivers.
       let vector = math.changeVectorMagnitude(
         math.subtractPairs(dest, lastPt),
-        1
+        0.5
       );
       let nextVector = vector;
-      if (roll(3) === 0) {
+      if (roll(10) <= 6) {
         // Go off to the side a bit.
         let forkPoints = forkBone({
           line: [lastPt, vector],
-          lengthRange: [1, 1],
-          angleRange: [30, 85]
+          lengthRange: [0.5, 0.5],
+          angleRange: [20, 90]
         });
         nextVector = pick(forkPoints);
       }
@@ -171,19 +174,6 @@ function comparePt(a: Pt, b: Pt) {
     return -1;
   }
   return 1;
-}
-
-function getForkVector(guide, angleInDegrees, toTheLeft): Pt {
-  var angle = (angleInDegrees * Math.PI) / 180;
-  if (!toTheLeft) {
-    angle = -angle;
-  }
-  const cosAngle = Math.cos(angle);
-  const sinAngle = Math.sin(angle);
-  return [
-    guide[0] * cosAngle - guide[1] * sinAngle,
-    guide[1] * cosAngle + guide[0] * sinAngle
-  ];
 }
 
 module.exports = waterStep;
