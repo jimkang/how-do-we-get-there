@@ -90,12 +90,21 @@ function PageFlow({
     textStep
   ];
 
-  var page: any = {}
+  var page: any = {};
 
   return pageFlow;
 
   function pageFlow({ stepMode = 'continuous' }) {
-    var stepOpts = { page, probable, getRandomPoint, showDevLayers, gridUnitSize, random };
+    var stepOpts = {
+      page,
+      probable,
+      getRandomPoint,
+      showDevLayers,
+      gridUnitSize,
+      random,
+      illusWidth,
+      illusHeight
+    };
     if (stepMode === 'continuous') {
       steps.slice(stepIndex).forEach(step => step(stepOpts));
       stepIndex = 0;
@@ -180,8 +189,7 @@ function PageFlow({
           points: Object.values(page.nodes),
           className: 'node',
           rootSelector: '#nodes',
-          labelAccessor:
-            randomizeNodeLabels ? getRandomLabel : getLinkCount
+          labelAccessor: randomizeNodeLabels ? getRandomLabel : getLinkCount
         });
       }
     }
@@ -298,8 +306,7 @@ function PageFlow({
           rootSelector: '#cut-points',
           className: 'cut-point',
           r: 0.7,
-          colorAccessor:
-            randomizeCutPointColor ? getCutPointColor() : undefined
+          colorAccessor: randomizeCutPointColor ? getCutPointColor() : undefined
         });
       }
     }
