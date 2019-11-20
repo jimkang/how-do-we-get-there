@@ -27,24 +27,27 @@ function waterStep({
   });
 
   const numberOfWaterOrigins = rollDie(8);
-  var waterOrigins: Array<Pt> = range(numberOfWaterOrigins).map(getRandomPoint);
+  var waterOriginsInUnits: Array<Pt> = range(numberOfWaterOrigins).map(
+    getRandomPoint
+  );
   var waterPointsInUnits: Array<Pt> = [];
 
-  if (waterOrigins.length > 1) {
+  if (waterOriginsInUnits.length > 1) {
     const originConnections =
       numberOfWaterOrigins * 0.3 + roll(numberOfWaterOrigins * 0.5);
     for (var i = 0; i < originConnections; ++i) {
       waterPointsInUnits = waterPointsInUnits.concat(
-        connectPair(sample(waterOrigins, 2))
+        connectPair(sample(waterOriginsInUnits, 2))
       );
     }
   }
 
   const numberOfPools = rollDie(numberOfWaterOrigins);
   waterPointsInUnits = waterPointsInUnits.concat(
-    flatten(sample(waterOrigins, numberOfPools).map(poolAroundOrigin))
+    flatten(sample(waterOriginsInUnits, numberOfPools).map(poolAroundOrigin))
   );
   var waterPoints: Array<Pt> = uniquifyPts(waterPointsInUnits).map(scalePtUp);
+  var waterOrigins: Array<Pt> = waterOriginsInUnits.map(scalePtUp);
 
   page.waterBodies = { waterOrigins, waterPoints };
 
@@ -93,8 +96,29 @@ function waterStep({
     return pathPoints;
   }
 
-  function poolAroundOrigin() {
-    return [];
+  function poolAroundOrigin(origin: Pt): Array<Pt> {
+    var pool: Array<Pt> = [origin];
+    const growthSteps = 2; //probable.rollDie(widthUnits/4);
+    var sources: Array<Pt> = [origin];
+    for (var i = 0; i < growthSteps; ++i) {
+      let growthVectors = [];
+      let nextSources = [];
+      // Fewer growth vectors on later growth steps.
+      for (let j = 0; j < 4 - i; ++j) {
+        let growthVector = math.changeVectorMagnitude(
+          [(probable.roll(201) - 100) / 100, (probable.roll(201) - 100) / 100],
+          Math.sqrt(2)
+        );
+        let newLocations: Array<Pt> = sources
+          .map(curry(math.addPairs)(growthVector))
+          .map(curry(quantizePt)(1));
+        pool = uniquifyPts(pool.concat(newLocations));
+        nextSources = nextSources.concat(newLocations);
+      }
+      sources = nextSources;
+    }
+
+    return pool;
   }
 
   function scalePtUp(pt: Pt): Pt {
@@ -110,6 +134,10 @@ function waterStep({
     const y = probable.roll(heightUnits + 1);
     return [x, y];
   }
+}
+
+function quantizePt(unit, pt: Pt): Pt {
+  return [quantize(unit, pt[0]), quantize(unit, pt[1])];
 }
 
 function quantize(unit, value) {
@@ -143,6 +171,19 @@ function comparePt(a: Pt, b: Pt) {
     return -1;
   }
   return 1;
+}
+
+function getForkVector(guide, angleInDegrees, toTheLeft): Pt {
+  var angle = (angleInDegrees * Math.PI) / 180;
+  if (!toTheLeft) {
+    angle = -angle;
+  }
+  const cosAngle = Math.cos(angle);
+  const sinAngle = Math.sin(angle);
+  return [
+    guide[0] * cosAngle - guide[1] * sinAngle,
+    guide[1] * cosAngle + guide[0] * sinAngle
+  ];
 }
 
 module.exports = waterStep;
