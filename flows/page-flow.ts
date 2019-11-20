@@ -16,6 +16,7 @@ var curveToPathString = require('../dom/curve-to-path-string');
 var renderBezierCurvePoints = require('../dom/render-bezier-curve-points');
 var renderGuy = require('../dom/render-guy');
 var renderStoryText = require('../dom/render-story-text');
+var waterStep = require('./water-step');
 
 var accessor = require('accessor')();
 const layerShowChance = 40;
@@ -43,6 +44,29 @@ function PageFlow({
   illusWidth = 100,
   illusHeight = 118,
   gridUnitSize
+}: {
+  seed: string;
+  curve: string;
+  widthToLength: number;
+  forkLengthMin: number;
+  showDevLayers: boolean;
+  hideProdLayers: boolean;
+  jointCount: number;
+  randomizeNxNLayerColor: boolean;
+  randomizeCutPathStyle: boolean;
+  randomizeLayersToShow: boolean;
+  randomizeCutPointColor: boolean;
+  randomizeJointSize: boolean;
+  randomizeNodeLabels: boolean;
+  randomizeReticulation: boolean;
+  randomizeJointCount: boolean;
+  figure: string;
+  friendFigure: string;
+  firstPage: boolean;
+  lastPage: boolean;
+  illusWidth: number;
+  illusHeight: number;
+  gridUnitSize: number;
 }) {
   var random = seedrandom(seed);
   var probable = Probable({ random });
@@ -50,11 +74,12 @@ function PageFlow({
 
   if (firstPage || lastPage) {
     jointCount = 10;
-  } else if (randomizeJointCount === 'yes') {
+  } else if (randomizeJointCount) {
     jointCount = 10 + probable.roll(140);
   }
 
   var steps = [
+    waterStep,
     jointStep,
     boneStep,
     nodeStep,
@@ -65,17 +90,18 @@ function PageFlow({
     textStep
   ];
 
-  var page = {};
+  var page: any = {}
 
   return pageFlow;
 
   function pageFlow({ stepMode = 'continuous' }) {
+    var stepOpts = { page, probable, getRandomPoint, showDevLayers, gridUnitSize, random };
     if (stepMode === 'continuous') {
-      steps.slice(stepIndex).forEach(step => step());
+      steps.slice(stepIndex).forEach(step => step(stepOpts));
       stepIndex = 0;
     } else {
       let step = steps[stepIndex];
-      step();
+      step(stepOpts);
       stepIndex += 1;
       if (stepIndex >= steps.length) {
         stepIndex = 0;
@@ -92,7 +118,7 @@ function PageFlow({
           points: page.joints,
           className: 'joint',
           rootSelector: '#joints',
-          r: randomizeJointSize === 'yes' ? getJointSize : undefined,
+          r: randomizeJointSize ? getJointSize : undefined,
           colorAccessor: getStarColor
         });
       }
@@ -108,7 +134,7 @@ function PageFlow({
         probable.roll(100) <= layerShowChance - 10
       ) {
         let colorAccessor;
-        if (randomizeNxNLayerColor === 'yes') {
+        if (randomizeNxNLayerColor) {
           if (probable.roll(4) === 0) {
             colorAccessor = getNxNColor;
           } else {
@@ -155,7 +181,7 @@ function PageFlow({
           className: 'node',
           rootSelector: '#nodes',
           labelAccessor:
-            randomizeNodeLabels === 'yes' ? getRandomLabel : getLinkCount
+            randomizeNodeLabels ? getRandomLabel : getLinkCount
         });
       }
     }
@@ -273,7 +299,7 @@ function PageFlow({
           className: 'cut-point',
           r: 0.7,
           colorAccessor:
-            randomizeCutPointColor === 'yes' ? getCutPointColor() : undefined
+            randomizeCutPointColor ? getCutPointColor() : undefined
         });
       }
     }
@@ -304,7 +330,7 @@ function PageFlow({
 
   function meatPathStep() {
     var d3Reticulator;
-    if (randomizeReticulation === 'yes') {
+    if (randomizeReticulation) {
       if (probable.roll(2) === 0) {
         let d3Curve = probable.pickFromArray([
           'curveBasisClosed',

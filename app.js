@@ -78,7 +78,7 @@ function followRoute({
     randomizeJointCount,
     firstPage,
     lastPage,
-    gridUnitSize
+    gridUnitSize: +gridUnitSize
   });
   wireControls({ pageFlow, clearSeed, hideUI: hideUI === 'yes' });
   pageFlow({ stepMode });
