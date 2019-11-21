@@ -4,6 +4,7 @@ var math = require('basic-2d-math');
 var ForkBone = require('fork-bone');
 var curry = require('lodash.curry');
 var flatten = require('lodash.flatten');
+var { quantizePt, uniquifyPts, comparePt, dist, scalePt } = require('../pt');
 
 import { Pt } from '../types';
 
@@ -13,13 +14,9 @@ function waterStep({
   showDevLayers,
   gridUnitSize,
   random,
-  illusWidth,
-  illusHeight
+  unitsWidth,
+  unitsHeight
 }) {
-  const widthUnits = illusWidth / gridUnitSize;
-  const heightUnits = illusHeight / gridUnitSize;
-  // Do everything in these units, then scale back up at the end.
-
   var { roll, rollDie, pick, sample } = probable;
   var forkBone = ForkBone({
     random,
@@ -27,40 +24,42 @@ function waterStep({
   });
 
   const numberOfWaterOrigins = rollDie(8);
-  var waterOriginsInUnits: Array<Pt> = range(numberOfWaterOrigins).map(
-    getRandomPoint
-  );
-  var waterPointsInUnits: Array<Pt> = [];
+  var waterOrigins: Array<Pt> = range(numberOfWaterOrigins).map(getRandomPoint);
+  var waterPoints: Array<Pt> = [];
 
-  if (waterOriginsInUnits.length > 1) {
+  if (waterOrigins.length > 1) {
     const originConnections =
       numberOfWaterOrigins * 0.3 + roll(numberOfWaterOrigins * 0.5);
     for (var i = 0; i < originConnections; ++i) {
-      waterPointsInUnits = waterPointsInUnits.concat(
-        connectPair(sample(waterOriginsInUnits, 2))
-      );
+      waterPoints = waterPoints.concat(connectPair(sample(waterOrigins, 2)));
     }
   }
 
   const numberOfPools = rollDie(numberOfWaterOrigins);
-  waterPointsInUnits = waterPointsInUnits.concat(
-    flatten(sample(waterOriginsInUnits, numberOfPools).map(poolAroundOrigin))
+  waterPoints = uniquifyPts(
+    waterPoints.concat(
+      flatten(sample(waterOrigins, numberOfPools).map(poolAroundOrigin))
+    )
   );
-  var waterPoints: Array<Pt> = uniquifyPts(waterPointsInUnits).map(scalePtUp);
-  var waterOrigins: Array<Pt> = waterOriginsInUnits.map(scalePtUp);
+  var waterPointsScaledUp: Array<Pt> = waterPoints.map(
+    curry(scalePt)(gridUnitSize)
+  );
+  var waterOriginsScaledUp: Array<Pt> = waterOrigins.map(
+    curry(scalePt)(gridUnitSize)
+  );
 
   page.waterBodies = { waterOrigins, waterPoints };
 
   if (showDevLayers) {
     renderPoints({
-      points: waterOrigins,
+      points: waterOriginsScaledUp,
       className: 'water-origin',
       rootSelector: '#water-origins',
       r: 2,
       colorAccessor: 'hsl(240, 50%, 60%)'
     });
     renderPoints({
-      points: waterPoints,
+      points: waterPointsScaledUp,
       className: 'water-point',
       rootSelector: '#water-points',
       r: 1,
@@ -92,16 +91,14 @@ function waterStep({
         });
         nextVector = pick(forkPoints);
       }
-      pathPoints.push(
-        math.addPairs(lastPt, nextVector).map(curry(quantize)(1))
-      );
+      pathPoints.push(quantizePt(math.addPairs(lastPt, nextVector), 1));
     }
     return pathPoints;
   }
 
   function poolAroundOrigin(origin: Pt): Array<Pt> {
     var pool: Array<Pt> = [origin];
-    const growthSteps = 2; //probable.rollDie(widthUnits/4);
+    const growthSteps = 2; //probable.rollDie(unitsWidth/4);
     var sources: Array<Pt> = [origin];
     for (var i = 0; i < growthSteps; ++i) {
       let growthVectors = [];
@@ -124,56 +121,11 @@ function waterStep({
     return pool;
   }
 
-  function scalePtUp(pt: Pt): Pt {
-    return [scaleValueUp(pt[0]), scaleValueUp(pt[1])];
-  }
-
-  function scaleValueUp(value: number): number {
-    return value * gridUnitSize;
-  }
-
   function getRandomPoint(): Pt {
-    const x = probable.roll(widthUnits + 1);
-    const y = probable.roll(heightUnits + 1);
+    const x = probable.roll(unitsWidth + 1);
+    const y = probable.roll(unitsHeight + 1);
     return [x, y];
   }
-}
-
-function quantizePt(unit, pt: Pt): Pt {
-  return [quantize(unit, pt[0]), quantize(unit, pt[1])];
-}
-
-function quantize(unit, value) {
-  return Math.round(value / unit) * unit;
-}
-
-function dist(a: Pt, b: Pt) {
-  return math.getVectorMagnitude(math.subtractPairs(b, a));
-}
-
-function uniquifyPts(pts: Array<Pt>) {
-  pts.sort(comparePt);
-  var uniquePts: Array<Pt> = [pts[0]];
-  var lastPtAdded = pts[0];
-  for (var i = 1; i < pts.length; ++i) {
-    let pt = pts[i];
-    if (pt[0] === lastPtAdded[0] && pt[1] === lastPtAdded[1]) {
-      continue;
-    }
-    lastPtAdded = pt;
-    uniquePts.push(pt);
-  }
-  return uniquePts;
-}
-
-function comparePt(a: Pt, b: Pt) {
-  if (a[0] === b[0] && a[1] === b[1]) {
-    return 0;
-  }
-  if (math.getVectorMagnitude(a) < math.getVectorMagnitude(b)) {
-    return -1;
-  }
-  return 1;
 }
 
 module.exports = waterStep;

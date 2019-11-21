@@ -4,7 +4,6 @@ var range = require('d3-array').range;
 var renderPoints = require('../dom/render-points');
 var renderEdges = require('../dom/render-edges');
 var math = require('basic-2d-math');
-var jsgraphs = require('js-graph-algorithms');
 var Enmeaten = require('enmeaten');
 var pluck = require('lodash.pluck');
 var flatten = require('lodash.flatten');
@@ -17,6 +16,8 @@ var renderBezierCurvePoints = require('../dom/render-bezier-curve-points');
 var renderGuy = require('../dom/render-guy');
 var renderStoryText = require('../dom/render-story-text');
 var waterStep = require('./water-step');
+var jointStep = require('./joint-step');
+var boneStep = require('./bone-step');
 
 var accessor = require('accessor')();
 const layerShowChance = 40;
@@ -28,7 +29,6 @@ function PageFlow({
   forkLengthMin = 0.2,
   showDevLayers,
   hideProdLayers = false,
-  jointCount = 100,
   randomizeNxNLayerColor,
   randomizeCutPathStyle,
   randomizeLayersToShow = false,
@@ -51,7 +51,6 @@ function PageFlow({
   forkLengthMin: number;
   showDevLayers: boolean;
   hideProdLayers: boolean;
-  jointCount: number;
   randomizeNxNLayerColor: boolean;
   randomizeCutPathStyle: boolean;
   randomizeLayersToShow: boolean;
@@ -72,12 +71,6 @@ function PageFlow({
   var probable = Probable({ random });
   var stepIndex = 0;
 
-  if (firstPage || lastPage) {
-    jointCount = 10;
-  } else if (randomizeJointCount) {
-    jointCount = 10 + probable.roll(140);
-  }
-
   var steps = [
     waterStep,
     jointStep,
@@ -95,6 +88,8 @@ function PageFlow({
   return pageFlow;
 
   function pageFlow({ stepMode = 'continuous' }) {
+    // All of the foundation steps should work in grid units.
+    // It's up to the renderers to scale them up.
     var stepOpts = {
       page,
       probable,
@@ -102,8 +97,8 @@ function PageFlow({
       showDevLayers,
       gridUnitSize,
       random,
-      illusWidth,
-      illusHeight
+      unitsWidth: illusWidth / gridUnitSize,
+      unitsHeight: illusHeight / gridUnitSize
     };
     if (stepMode === 'continuous') {
       steps.slice(stepIndex).forEach(step => step(stepOpts));
@@ -114,61 +109,6 @@ function PageFlow({
       stepIndex += 1;
       if (stepIndex >= steps.length) {
         stepIndex = 0;
-      }
-    }
-  }
-
-  function jointStep() {
-    page.joints = range(jointCount).map(getRandomPoint);
-    //console.log('page.joints', page.joints);
-    if (showDevLayers) {
-      if (!randomizeLayersToShow || probable.roll(100) <= layerShowChance) {
-        renderPoints({
-          points: page.joints,
-          className: 'joint',
-          rootSelector: '#joints',
-          r: randomizeJointSize ? getJointSize : undefined,
-          colorAccessor: getStarColor
-        });
-      }
-    }
-  }
-
-  function boneStep() {
-    var graph = getNByNGraph({ points: page.joints });
-    //console.log(graph);
-    if (showDevLayers) {
-      if (
-        !randomizeLayersToShow ||
-        probable.roll(100) <= layerShowChance - 10
-      ) {
-        let colorAccessor;
-        if (randomizeNxNLayerColor) {
-          if (probable.roll(4) === 0) {
-            colorAccessor = getNxNColor;
-          } else {
-            colorAccessor = getNxNColor();
-          }
-        }
-
-        renderEdges({
-          edges: graph,
-          className: 'n-by-n-edge',
-          rootSelector: '#n-by-n-graph',
-          colorAccessor
-        });
-      }
-    }
-
-    page.bones = getMST({ graph, points: page.joints });
-
-    if (showDevLayers) {
-      if (!randomizeLayersToShow || probable.roll(100) <= layerShowChance) {
-        renderEdges({
-          edges: page.bones,
-          className: 'bone',
-          rootSelector: '#bones'
-        });
       }
     }
   }
@@ -565,53 +505,6 @@ function PageFlow({
     var boneSlope = (bone.y2 - bone.y1) / boneXRange;
     var xDelta = probable.roll(boneXRange * 1000) / 1000;
     return [bone.y2 + xDelta, bone.y1 + xDelta * boneSlope];
-  }
-}
-
-// Creates edges between every point and every other point in points.
-function getNByNGraph({ points }) {
-  var graph = [];
-  points.map(createEdgesToOtherPoints);
-  return graph;
-
-  function createEdgesToOtherPoints(point, i) {
-    for (var j = 0; j < points.length; ++j) {
-      if (i !== j) {
-        graph.push({
-          start: i,
-          dest: j,
-          x1: point[0],
-          y1: point[1],
-          x2: points[j][0],
-          y2: points[j][1],
-          dist: math.getVectorMagnitude(math.subtractPairs(point, points[j]))
-        });
-      }
-    }
-  }
-}
-
-function getMST({ graph, points }) {
-  var g = new jsgraphs.WeightedGraph(points.length);
-  graph.forEach(addEdgeToJSGraph);
-  var finder = new jsgraphs.EagerPrimMST(g);
-  return finder.mst.map(createEdgeObject);
-
-  function addEdgeToJSGraph(edge) {
-    g.addEdge(new jsgraphs.Edge(edge.start, edge.dest, edge.dist));
-  }
-
-  function createEdgeObject(jsGraphEdge) {
-    var start = jsGraphEdge.from();
-    var dest = jsGraphEdge.to();
-    return {
-      start,
-      dest,
-      x1: points[start][0],
-      y1: points[start][1],
-      x2: points[dest][0],
-      y2: points[dest][1]
-    };
   }
 }
 
