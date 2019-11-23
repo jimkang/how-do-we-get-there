@@ -15,7 +15,6 @@ run:
 
 build:
 	$(BROWSERIFY) $(PLUGIN_SWITCH) app.js | $(UGLIFY) -c -m -o index.js
-		
 
 prettier:
 	prettier --single-quote --write "**/*.js"

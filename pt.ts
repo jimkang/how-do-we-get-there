@@ -1,19 +1,25 @@
 import { Pt } from './types';
 var math = require('basic-2d-math');
 
-function quantizePt(unit, pt: Pt): Pt {
+export function quantizePt(unit: number, pt: Pt): Pt {
   return [quantize(unit, pt[0]), quantize(unit, pt[1])];
 }
 
-function quantize(unit, value) {
+export function quantize(unit: number, value: number): number {
+  if (isNaN(unit) || isNaN(unit)) {
+    throw new Error(
+      `Non-numbers passed to quantize. Unit: ${unit}, value: ${value}`
+    );
+  }
+
   return Math.round(value / unit) * unit;
 }
 
-function dist(a: Pt, b: Pt) {
+export function dist(a: Pt, b: Pt) {
   return math.getVectorMagnitude(math.subtractPairs(b, a));
 }
 
-function uniquifyPts(pts: Array<Pt>) {
+export function uniquifyPts(pts: Array<Pt>) {
   pts.sort(comparePt);
   var uniquePts: Array<Pt> = [pts[0]];
   var lastPtAdded = pts[0];
@@ -28,7 +34,7 @@ function uniquifyPts(pts: Array<Pt>) {
   return uniquePts;
 }
 
-function comparePt(a: Pt, b: Pt) {
+export function comparePt(a: Pt, b: Pt) {
   if (a[0] === b[0] && a[1] === b[1]) {
     return 0;
   }
@@ -38,8 +44,6 @@ function comparePt(a: Pt, b: Pt) {
   return 1;
 }
 
-function scalePt(scale: number, pt: Pt): Pt {
+export function scalePt(scale: number, pt: Pt): Pt {
   return [scale * pt[0], scale * pt[1]];
 }
-
-module.exports = { quantizePt, dist, uniquifyPts, comparePt, scalePt };

@@ -4,7 +4,15 @@ var math = require('basic-2d-math');
 var ForkBone = require('fork-bone');
 var curry = require('lodash.curry');
 var flatten = require('lodash.flatten');
-var { quantizePt, uniquifyPts, comparePt, dist } = require('../pt');
+
+// The type checking on the function parameters passed to quantize
+// are thrown away if you include them this way. Sucks.
+//var s: string = 's';
+//var b: string = 'b';
+//var what: number = quantize(s, b);
+//console.log('what', what);
+
+import { quantizePt, quantize, uniquifyPts, comparePt, dist } from '../pt';
 
 import { Pt } from '../types';
 
@@ -87,7 +95,8 @@ function waterStep({
         });
         nextVector = pick(forkPoints);
       }
-      pathPoints.push(quantizePt(math.addPairs(lastPt, nextVector), 1));
+      let pathPt: Pt = quantizePt(1, math.addPairs(lastPt, nextVector));
+      pathPoints.push(pathPt);
     }
     return pathPoints;
   }

@@ -1,10 +1,11 @@
 var renderPoints = require('../dom/render-points');
 var accessor = require('accessor');
 
-import { Pt, Node } from '../types';
+import { Pt, Node, NodeMap } from '../types';
 
 function nodeStep({ page, showDevLayers, gridUnitSize }) {
-  page.nodes = {};
+  var nodeMap: NodeMap = {};
+  page.nodes = nodeMap;
   page.bones.forEach(updateNodesConnectedToBone);
 
   if (showDevLayers) {

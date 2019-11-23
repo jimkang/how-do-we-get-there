@@ -19,6 +19,7 @@ var waterStep = require('./water-step');
 var jointStep = require('./joint-step');
 var boneStep = require('./bone-step');
 var nodeStep = require('./node-step');
+var trainLineStep = require('./trainline-step');
 
 var accessor = require('accessor');
 const layerShowChance = 40;
@@ -77,7 +78,7 @@ function PageFlow({
     jointStep,
     boneStep,
     nodeStep,
-    limbStep,
+    trainLineStep,
     //enmeatenStep,
     //meatPathStep,
     guyStep,
@@ -118,77 +119,6 @@ function PageFlow({
     const x = ~~(probable.roll(illusWidth + 1) / gridUnitSize) * gridUnitSize;
     const y = ~~(probable.roll(illusHeight + 1) / gridUnitSize) * gridUnitSize;
     return [x, y];
-  }
-
-  function limbStep() {
-    var junctionNodes = Object.values(page.nodes).filter(nodeIsAJunction);
-    page.limbs = {};
-    if (junctionNodes.length < 1) {
-      junctionNodes.push(Object.values(page.nodes)[0]);
-    }
-
-    junctionNodes.forEach(followLinksToFillLimbs);
-
-    if (showDevLayers) {
-      if (!randomizeLayersToShow || probable.roll(100) <= layerShowChance) {
-        renderEdges({
-          edges: flatten(Object.values(page.limbs).map(getLimbEdges)),
-          className: 'limb-edge',
-          rootSelector: '#limbs',
-          colorAccessor: accessor('color')
-        });
-      }
-    }
-
-    function followLinksToFillLimbs(junctionNode) {
-      // You can't use curry to init followLinkToFillLimb here for us in map.
-      // . e.g.
-      // var limbs = junctionNode.links
-      //  .map(curry(followLinkToFillLimb)([ junctionNode ]))
-      // It will use the same array ([ junctionNode ]) for every call to
-      // followLinkToFillLimb, making it append to arrays that start with
-      // a lot of elements in 2nd, 3rd, etc. calls!
-      var limbs = [];
-      for (var i = 0; i < junctionNode.links.length; ++i) {
-        limbs.push(
-          wrapInLimbObject(
-            followLinkToFillLimb([junctionNode], junctionNode.links[i])
-          )
-        );
-      }
-      limbs.forEach(addToPageLimbs);
-
-      function followLinkToFillLimb(limbNodes, destNodeId) {
-        var destNode = page.nodes[destNodeId];
-        limbNodes.push(destNode);
-
-        if (destNode.links.length === 2) {
-          let nodeWeCameFromId = limbNodes[limbNodes.length - 1].id;
-          if (limbNodes.length > 1) {
-            nodeWeCameFromId = limbNodes[limbNodes.length - 2].id;
-          }
-          let otherNodeId = otherNodeIdFromLink(destNode, nodeWeCameFromId);
-          if (pluck(limbNodes, 'id').indexOf(otherNodeId) === -1) {
-            return followLinkToFillLimb(limbNodes, otherNodeId);
-          }
-        }
-        return limbNodes;
-      }
-    }
-  }
-
-  function wrapInLimbObject(limbNodes) {
-    return {
-      id: [limbNodes[0].id, limbNodes[limbNodes.length - 1].id]
-        .sort()
-        .join('__'),
-      nodes: limbNodes,
-      color: `hsl(${probable.roll(360)}, 70%, 50%)`
-    };
-  }
-
-  function addToPageLimbs(limb) {
-    page.limbs[limb.id] = limb;
   }
 
   function enmeatenStep() {
@@ -462,33 +392,6 @@ function PageFlow({
     var xDelta = probable.roll(boneXRange * 1000) / 1000;
     return [bone.y2 + xDelta, bone.y1 + xDelta * boneSlope];
   }
-}
-
-function nodeIsAJunction(node) {
-  return node.links.length > 2;
-}
-
-function otherNodeIdFromLink(node, unwantedNodeId) {
-  if (node.links.length !== 2) {
-    throw new Error(
-      `otherNodeIdFromLink passed node with ${node.links.length} links; only works if there are two.`
-    );
-  }
-  return node.links[0] === unwantedNodeId ? node.links[1] : node.links[0];
-}
-
-function getLimbEdges(limb) {
-  var edges = [];
-  for (var i = 0; i < limb.nodes.length - 1; ++i) {
-    edges.push({
-      x1: limb.nodes[i][0],
-      y1: limb.nodes[i][1],
-      x2: limb.nodes[i + 1][0],
-      y2: limb.nodes[i + 1][1],
-      color: limb.color
-    });
-  }
-  return edges;
 }
 
 function getPointFromNode(node) {
