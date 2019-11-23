@@ -1,6 +1,4 @@
 var renderPoints = require('../dom/render-points');
-var { scalePt } = require('../pt');
-var curry = require('lodash.curry');
 
 function jointStep({
   page,
@@ -29,7 +27,8 @@ function jointStep({
 
   if (showDevLayers) {
     renderPoints({
-      points: page.joints.map(curry(scalePt)(gridUnitSize)),
+      points: page.joints,
+      scale: gridUnitSize,
       className: 'joint',
       rootSelector: '#joints',
       r: 0.5,

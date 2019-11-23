@@ -1,5 +1,4 @@
 var renderEdges = require('../dom/render-edges');
-var { scalePt } = require('../pt');
 var curry = require('lodash.curry');
 var getNByNGraph = require('./get-n-by-n-graph');
 var getMST = require('./get-mst');

@@ -1,4 +1,7 @@
 var d3 = require('d3-selection');
+var accessor = require('accessor');
+var { scalePt } = require('../pt');
+var curry = require('lodash.curry');
 
 function renderPoints({
   points,
@@ -8,8 +11,15 @@ function renderPoints({
   yProperty = '1',
   r = 1,
   labelAccessor,
-  colorAccessor
+  colorAccessor,
+  ptAccessor = accessor('identity'),
+  scale
 }) {
+  var scaleFn;
+  if (scale) {
+    scaleFn = curry(scalePt)(scale);
+  }
+
   const pointSelector = '.' + className;
   var pointsRoot = d3.select(rootSelector);
   pointsRoot.selectAll(pointSelector).remove();
@@ -39,7 +49,11 @@ function renderPoints({
   }
 
   function getTransform(point) {
-    return `translate(${point[xProperty]}, ${point[yProperty]})`;
+    var pt = ptAccessor(point);
+    if (scaleFn) {
+      pt = scaleFn(pt);
+    }
+    return `translate(${pt[xProperty]}, ${pt[yProperty]})`;
   }
 }
 

@@ -4,7 +4,7 @@ var math = require('basic-2d-math');
 var ForkBone = require('fork-bone');
 var curry = require('lodash.curry');
 var flatten = require('lodash.flatten');
-var { quantizePt, uniquifyPts, comparePt, dist, scalePt } = require('../pt');
+var { quantizePt, uniquifyPts, comparePt, dist } = require('../pt');
 
 import { Pt } from '../types';
 
@@ -41,25 +41,21 @@ function waterStep({
       flatten(sample(waterOrigins, numberOfPools).map(poolAroundOrigin))
     )
   );
-  var waterPointsScaledUp: Array<Pt> = waterPoints.map(
-    curry(scalePt)(gridUnitSize)
-  );
-  var waterOriginsScaledUp: Array<Pt> = waterOrigins.map(
-    curry(scalePt)(gridUnitSize)
-  );
 
   page.waterBodies = { waterOrigins, waterPoints };
 
   if (showDevLayers) {
     renderPoints({
-      points: waterOriginsScaledUp,
+      points: waterOrigins,
+      scale: gridUnitSize,
       className: 'water-origin',
       rootSelector: '#water-origins',
       r: 2,
       colorAccessor: 'hsl(240, 50%, 60%)'
     });
     renderPoints({
-      points: waterPointsScaledUp,
+      points: waterPoints,
+      scale: gridUnitSize,
       className: 'water-point',
       rootSelector: '#water-points',
       r: 1,

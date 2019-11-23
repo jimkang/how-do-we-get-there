@@ -18,8 +18,9 @@ var renderStoryText = require('../dom/render-story-text');
 var waterStep = require('./water-step');
 var jointStep = require('./joint-step');
 var boneStep = require('./bone-step');
+var nodeStep = require('./node-step');
 
-var accessor = require('accessor')();
+var accessor = require('accessor');
 const layerShowChance = 40;
 
 function PageFlow({
@@ -117,51 +118,6 @@ function PageFlow({
     const x = ~~(probable.roll(illusWidth + 1) / gridUnitSize) * gridUnitSize;
     const y = ~~(probable.roll(illusHeight + 1) / gridUnitSize) * gridUnitSize;
     return [x, y];
-  }
-
-  function nodeStep() {
-    page.nodes = {};
-    page.bones.forEach(updateNodesConnectedToBone);
-
-    if (showDevLayers) {
-      if (!randomizeLayersToShow || probable.roll(100) <= layerShowChance) {
-        renderPoints({
-          points: Object.values(page.nodes),
-          className: 'node',
-          rootSelector: '#nodes',
-          labelAccessor: randomizeNodeLabels ? getRandomLabel : getLinkCount
-        });
-      }
-    }
-
-    function updateNodesConnectedToBone(bone) {
-      updateNode(bone.start, bone.dest);
-      updateNode(bone.dest, bone.start);
-    }
-
-    function updateNode(jointIndex, destJointIndex) {
-      var nodeId = getNodeIdForJointIndex(jointIndex);
-      var node = page.nodes[nodeId];
-      if (!node) {
-        let joint = page.joints[jointIndex];
-        node = {
-          id: nodeId,
-          links: [],
-          bones: [],
-          0: joint[0],
-          1: joint[1]
-        };
-        page.nodes[nodeId] = node;
-      }
-      var linkedNodeId = getNodeIdForJointIndex(destJointIndex);
-      if (node.links.indexOf(linkedNodeId) === -1) {
-        node.links.push(linkedNodeId);
-      }
-    }
-  }
-
-  function getNodeIdForJointIndex(index) {
-    return page.joints[index].join('_');
   }
 
   function limbStep() {
@@ -506,10 +462,6 @@ function PageFlow({
     var xDelta = probable.roll(boneXRange * 1000) / 1000;
     return [bone.y2 + xDelta, bone.y1 + xDelta * boneSlope];
   }
-}
-
-function getLinkCount(node) {
-  return node.links.length;
 }
 
 function nodeIsAJunction(node) {

@@ -1,5 +1,5 @@
 var d3 = require('d3-selection');
-var accessor = require('accessor')();
+var accessor = require('accessor');
 
 function renderEdges({ edges, className, rootSelector, colorAccessor }) {
   var edgesRoot = d3.select(rootSelector);
