@@ -1,18 +1,15 @@
 var seedrandom = require('seedrandom');
 var Probable = require('probable').createProbable;
-var range = require('d3-array').range;
-var renderPoints = require('../dom/render-points');
-var renderEdges = require('../dom/render-edges');
-var math = require('basic-2d-math');
-var Enmeaten = require('enmeaten');
-var pluck = require('lodash.pluck');
-var flatten = require('lodash.flatten');
-var shape = require('d3-shape');
-var renderPaths = require('../dom/render-paths');
-var curvesFromExtremes = require('../dom/curves-from-extremes');
-var zoom = require('d3-zoom');
-var curveToPathString = require('../dom/curve-to-path-string');
-var renderBezierCurvePoints = require('../dom/render-bezier-curve-points');
+//var math = require('basic-2d-math');
+//var Enmeaten = require('enmeaten');
+//var pluck = require('lodash.pluck');
+//var flatten = require('lodash.flatten');
+//var shape = require('d3-shape');
+//var renderPaths = require('../dom/render-paths');
+//var curvesFromExtremes = require('../dom/curves-from-extremes');
+//var zoom = require('d3-zoom');
+//var curveToPathString = require('../dom/curve-to-path-string');
+//var renderBezierCurvePoints = require('../dom/render-bezier-curve-points');
 var renderGuy = require('../dom/render-guy');
 var renderStoryText = require('../dom/render-story-text');
 var waterStep = require('./water-step');
@@ -21,32 +18,29 @@ var boneStep = require('./bone-step');
 var nodeStep = require('./node-step');
 var trainLineStep = require('./trainline-step');
 
-var accessor = require('accessor');
-const layerShowChance = 40;
+//var accessor = require('accessor');
+//const layerShowChance = 40;
 
-function PageFlow({
-  seed,
-  curve,
-  widthToLength = 1.5,
-  forkLengthMin = 0.2,
-  showDevLayers,
-  hideProdLayers = false,
-  randomizeNxNLayerColor,
-  randomizeCutPathStyle,
-  randomizeLayersToShow = false,
-  randomizeCutPointColor,
-  randomizeJointSize,
-  randomizeNodeLabels,
-  randomizeReticulation,
-  randomizeJointCount,
-  figure = '🐙',
-  friendFigure = '🦀',
-  firstPage,
-  lastPage,
-  illusWidth = 100,
-  illusHeight = 118,
-  gridUnitSize
-}: {
+function PageFlow(
+  {
+    seed,
+    //curve,
+    //widthToLength = 1.5,
+    //forkLengthMin = 0.2,
+    showDevLayers,
+    //hideProdLayers = false,
+    //randomizeCutPathStyle,
+    //randomizeLayersToShow = false,
+    //randomizeCutPointColor,
+    //randomizeReticulation,
+    figure = '🐙',
+    friendFigure = '🦀',
+    firstPage,
+    lastPage,
+    illusWidth = 100,
+    illusHeight = 118,
+    gridUnitSize
+  } /*: {
   seed: string;
   curve: string;
   widthToLength: number;
@@ -68,7 +62,8 @@ function PageFlow({
   illusWidth: number;
   illusHeight: number;
   gridUnitSize: number;
-}) {
+}*/
+) {
   var random = seedrandom(seed);
   var probable = Probable({ random });
   var stepIndex = 0;
@@ -85,7 +80,7 @@ function PageFlow({
     textStep
   ];
 
-  var page: any = {};
+  var page = {};
 
   return pageFlow;
 
@@ -121,6 +116,7 @@ function PageFlow({
     return [x, y];
   }
 
+  /*
   function enmeatenStep() {
     var enmeaten = Enmeaten({ random, numberOfDecimalsToConsider: 3 });
     page.cuts = Object.values(page.limbs).map(makeCut);
@@ -237,6 +233,7 @@ function PageFlow({
       }
     }
   }
+*/
 
   function guyStep() {
     var homeBone = probable.pickFromArray(page.bones);
@@ -335,6 +332,7 @@ function PageFlow({
 
     renderStoryText({ text });
   }
+  /*
   function getTunnelColor() {
     if (probable.roll(4) === 0) {
       return 'hsla(0, 0%, 0%, 0.8)';
@@ -385,6 +383,7 @@ function PageFlow({
       return probable.roll(10);
     }
   }
+  */
 
   function getLocationOnBone(bone) {
     var boneXRange = bone.x2 - bone.y2;
@@ -394,6 +393,7 @@ function PageFlow({
   }
 }
 
+/*
 function getPointFromNode(node) {
   return [node[0], node[1]];
 }
@@ -410,11 +410,11 @@ function getMaxBoneLengthInNodes(nodes) {
   }
   return maxLength;
 }
-
+*/
 // If width is really close to endToEndDistance, it will cut it down a lot.
 // If it's really far, then it won't affect it much.
-function clampWidth({ width, endToEndDistance }) {
-  return Math.max(width * (1.0 - width / endToEndDistance) * 0.6, 0);
-}
+//function clampWidth({ width, endToEndDistance }) {
+// return Math.max(width * (1.0 - width / endToEndDistance) * 0.6, 0);
+//}
 
 module.exports = PageFlow;

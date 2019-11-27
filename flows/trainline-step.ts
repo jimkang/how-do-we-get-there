@@ -1,33 +1,51 @@
-var pluck = require('lodash.pluck');
-var renderEdges = require('../dom/render-edges');
-var flatten = require('lodash.flatten');
+//var pluck = require('lodash.pluck');
+var renderPoints = require('../dom/render-points');
 var accessor = require('accessor');
+//var renderEdges = require('../dom/render-edges');
 
 import { Node, NodeMap, Trainline } from '../types';
 
-function trainLineStep({ page, showDevLayers, probable }): void {
+function trainLineStep({ page, showDevLayers, probable, gridUnitSize }): void {
   var nodeMap: NodeMap = page.nodes;
+  var nodes: Node[] = Object.values(nodeMap);
+  var trainlineMap: Record<string, Trainline> = {};
+
+  var endNodes: Node[] = nodes.filter(nodeIsAnEnd);
+  /*
   var junctionNodes: Array<Node> = Object.values(nodeMap).filter(
     nodeIsAJunction
   );
-  var trainlineMap: Record<string, Trainline> = {};
   if (junctionNodes.length < 1) {
     junctionNodes.push(Object.values(nodeMap)[0]);
   }
 
   junctionNodes.forEach(followLinksToFillLimbs);
+  */
 
   if (showDevLayers) {
+    renderPoints({
+      rootSelector: '#trainline-guide-points',
+      points: endNodes,
+      scale: gridUnitSize,
+      className: 'trainline-guide-end',
+      r: 1.0,
+      colorAccessor: 'hsl(10, 50%, 50%)',
+      ptAccessor: accessor('pt')
+    });
+
+    /*
     renderEdges({
       edges: flatten(Object.values(trainlineMap)),
       className: 'trainLine-edge',
-      rootSelector: '#trainLines',
+      rootSelector: '#trainlines-bones',
       colorAccessor: accessor('color')
     });
+    */
   }
 
   page.trainlines = trainlineMap;
 
+  /*
   function followLinksToFillLimbs(junctionNode) {
     // You cannot use curry to init followLinkToFillLimb here for us in map.
     // . e.g.
@@ -77,12 +95,18 @@ function trainLineStep({ page, showDevLayers, probable }): void {
   function addToPageLimbs(trainLine) {
     trainlineMap[trainLine.id] = trainLine;
   }
+*/
 }
 
-function nodeIsAJunction(node) {
-  return node.links.length > 2;
+//function nodeIsAJunction(node) {
+// return node.links.length > 2;
+//}
+
+function nodeIsAnEnd(node) {
+  return node.links.length === 1;
 }
 
+/*
 function otherNodeIdFromLink(node, unwantedNodeId) {
   if (node.links.length !== 2) {
     throw new Error(
@@ -91,5 +115,6 @@ function otherNodeIdFromLink(node, unwantedNodeId) {
   }
   return node.links[0] === unwantedNodeId ? node.links[1] : node.links[0];
 }
+*/
 
 module.exports = trainLineStep;
