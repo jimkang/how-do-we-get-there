@@ -3,9 +3,9 @@ var renderEdges = require('../dom/render-edges');
 var flatten = require('lodash.flatten');
 var accessor = require('accessor');
 
-import { Node, NodeMap, Pt, Trainline } from '../types';
+import { Node, NodeMap, Trainline } from '../types';
 
-function trainLineStep({ page, showDevLayers, probable }) {
+function trainLineStep({ page, showDevLayers, probable }): void {
   var nodeMap: NodeMap = page.nodes;
   var junctionNodes: Array<Node> = Object.values(nodeMap).filter(
     nodeIsAJunction
@@ -46,7 +46,7 @@ function trainLineStep({ page, showDevLayers, probable }) {
     }
     trainLines.forEach(addToPageLimbs);
 
-    function followLinkToFillLimb(trainLineNodes, destNodeId) {
+    function followLinkToFillLimb(trainLineNodes, destNodeId): void {
       var destNode = page.nodes[destNodeId];
       trainLineNodes.push(destNode);
 
@@ -55,7 +55,7 @@ function trainLineStep({ page, showDevLayers, probable }) {
         if (trainLineNodes.length > 1) {
           nodeWeCameFromId = trainLineNodes[trainLineNodes.length - 2].id;
         }
-        let otherNodeId = otherNodeIdFromLink(destNode, nodeWeCameFromId);
+        const otherNodeId = otherNodeIdFromLink(destNode, nodeWeCameFromId);
         if (pluck(trainLineNodes, 'id').indexOf(otherNodeId) === -1) {
           return followLinkToFillLimb(trainLineNodes, otherNodeId);
         }
@@ -64,7 +64,7 @@ function trainLineStep({ page, showDevLayers, probable }) {
     }
   }
 
-  function wrapInLimbObject(trainLineNodes) {
+  function wrapInLimbObject(trainLineNodes): object {
     return {
       id: [trainLineNodes[0].id, trainLineNodes[trainLineNodes.length - 1].id]
         .sort()
