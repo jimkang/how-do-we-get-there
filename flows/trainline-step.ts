@@ -14,9 +14,9 @@ var colors: Array<Color> = [
   makeColor({ name: 'blue', h: 217.8, s: 100, l: 32.4 }),
   makeColor({ name: 'orange', h: 35.2, s: 100, l: 46.5 }),
   makeColor({ name: 'purple', h: 313.5, s: 53.3, l: 32.7 }),
-  makeColor({ name: 'brown', h: 30, s: 30, l: 50 }),
+  makeColor({ name: 'brown', h: 20.3, s: 65.4, l: 25 }),
   makeColor({ name: 'yellow', h: 44.1, s: 100, l: 58.6 }),
-  makeColor({ name: 'pink', h: 350, s: 50, l: 60 }),
+  makeColor({ name: 'pink', h: 336, s: 63.3, l: 69 }),
   makeColor({ name: 'silver', h: 208, s: 6.1, l: 51.6 })
 ];
 
