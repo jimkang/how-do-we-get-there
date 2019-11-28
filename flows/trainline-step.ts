@@ -9,15 +9,15 @@ var renderEdges = require('../dom/render-edges');
 import { Node, NodeMap, TrainLine, Color } from '../types';
 
 var colors: Array<Color> = [
-  makeColor({ name: 'red', h: 0, s: 50, l: 50 }),
-  makeColor({ name: 'green', h: 180, s: 50, l: 50 }),
-  makeColor({ name: 'blue', h: 220, s: 50, l: 50 }),
-  makeColor({ name: 'orange', h: 30, s: 50, l: 50 }),
-  makeColor({ name: 'purple', h: 300, s: 50, l: 50 }),
-  makeColor({ name: 'brown', h: 30, s: 20, l: 40 }),
-  makeColor({ name: 'yellow', h: 60, s: 50, l: 50 }),
-  makeColor({ name: 'pink', h: 350, s: 30, l: 70 }),
-  makeColor({ name: 'silver', h: 0, s: 0, l: 50 })
+  makeColor({ name: 'red', h: 4.1, s: 77.2, l: 48.2 }),
+  makeColor({ name: 'green', h: 144.7, s: 100, l: 25.9 }),
+  makeColor({ name: 'blue', h: 217.8, s: 100, l: 32.4 }),
+  makeColor({ name: 'orange', h: 35.2, s: 100, l: 46.5 }),
+  makeColor({ name: 'purple', h: 313.5, s: 53.3, l: 32.7 }),
+  makeColor({ name: 'brown', h: 30, s: 30, l: 50 }),
+  makeColor({ name: 'yellow', h: 44.1, s: 100, l: 58.6 }),
+  makeColor({ name: 'pink', h: 350, s: 50, l: 60 }),
+  makeColor({ name: 'silver', h: 208, s: 6.1, l: 51.6 })
 ];
 
 // Add darker and lighter versions of base set.
