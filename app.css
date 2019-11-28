@@ -123,6 +123,9 @@ button {
   border: 1px solid white;
 }
 
+.trainline-bone {
+}
+
 @media all and (max-height: 568px) {
   body {
     font-size: 18px;

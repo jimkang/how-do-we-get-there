@@ -1,7 +1,23 @@
 var d3 = require('d3-selection');
-var accessor = require('accessor');
+var curry = require('lodash.curry');
 
-function renderEdges({ edges, className, rootSelector, colorAccessor }) {
+// TODO: Maybe edges should just be 2D arrays.
+
+function scaleScalar(scale, n) {
+  return scale * n;
+}
+
+function renderEdges({
+  edges,
+  className,
+  rootSelector,
+  colorAccessor,
+  scale = 1.0
+}) {
+  var scaleFn;
+  if (scale) {
+    scaleFn = curry(scaleScalar)(scale);
+  }
   var edgesRoot = d3.select(rootSelector);
   edgesRoot.selectAll('.' + className).remove();
   var edgeLines = edgesRoot
@@ -10,13 +26,18 @@ function renderEdges({ edges, className, rootSelector, colorAccessor }) {
     .enter()
     .append('line')
     .classed(className, true)
-    .attr('x1', accessor('x1'))
-    .attr('y1', accessor('y1'))
-    .attr('x2', accessor('x2'))
-    .attr('y2', accessor('y2'));
+    .attr('x1', curry(getScaled)(scaleFn, 'x1'))
+    .attr('y1', curry(getScaled)(scaleFn, 'y1'))
+    .attr('x2', curry(getScaled)(scaleFn, 'x2'))
+    .attr('y2', curry(getScaled)(scaleFn, 'y2'));
+
   if (colorAccessor) {
     edgeLines.attr('stroke', colorAccessor);
   }
+}
+
+function getScaled(scaleFn, prop, d) {
+  return scaleFn(d[prop]);
 }
 
 module.exports = renderEdges;

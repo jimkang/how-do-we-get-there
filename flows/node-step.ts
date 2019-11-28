@@ -1,7 +1,7 @@
 var renderPoints = require('../dom/render-points');
 var accessor = require('accessor');
 
-import { Pt, Node, NodeMap } from '../types';
+import { Node, NodeMap } from '../types';
 
 function nodeStep({ page, showDevLayers, gridUnitSize }) {
   var nodeMap: NodeMap = {};
@@ -33,7 +33,8 @@ function nodeStep({ page, showDevLayers, gridUnitSize }) {
         id: nodeId,
         links: [],
         bones: [],
-        pt: joint
+        pt: joint,
+        trainLineMap: {}
       };
       page.nodes[nodeId] = node;
     }
